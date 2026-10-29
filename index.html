@@ -1,0 +1,410 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Acoustic Fault Detection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="brand">
+            <div class="brand-mark">AFD</div>
+            <div>
+                <h1>Real-Time Acoustic Fault Detection</h1>
+                <p>INTELLIGENT MACHINE CONDITION MONITORING</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="system-status">
+                <span class="status-dot"></span>
+                <span id="connectionStatus">CONNECTING</span>
+            </div>
+
+            <div class="header-meta">
+                <span class="meta-label">MODE</span>
+                <strong>SOFTWARE SIMULATION</strong>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- PAGE HEADING -->
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">MACHINE INTELLIGENCE / MONITORING</p>
+                <h2>Machine Health Console</h2>
+                <p class="subtitle">
+                    Vibration analysis, fault classification and signal monitoring
+                </p>
+            </div>
+
+            <div class="simulation-badge">
+                <span class="simulation-indicator"></span>
+                VIRTUAL SENSORS ACTIVE
+            </div>
+        </section>
+
+        <!-- DETECTION CONTROLS -->
+        <section class="control-panel panel">
+            <div class="section-heading">
+                <div class="heading-icon">01</div>
+                <div>
+                    <h3>Detection Control</h3>
+                    <p>Configure a simulated machine condition</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="field-group">
+                    <label for="fault">FAULT SCENARIO</label>
+                    <select id="fault">
+                        <option value="normal">Normal Operation</option>
+                        <option value="imbalance">Rotor Imbalance</option>
+                        <option value="misalignment">Shaft Misalignment</option>
+                        <option value="loose_mounting">Loose Mounting</option>
+                    </select>
+                </div>
+
+                <div class="control-actions">
+                    <button class="btn btn-primary" onclick="detectFault()">
+                        <span>⌕</span> ANALYZE MACHINE
+                    </button>
+
+                    <button class="btn btn-start" id="startButton"
+                            onclick="startMonitoring()">
+                        <span>▶</span> START MONITORING
+                    </button>
+
+                    <button class="btn btn-stop" id="stopButton"
+                            onclick="stopMonitoring()" disabled>
+                        <span>■</span> STOP
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-footer">
+                <span><span class="mini-dot"></span> Backend: FastAPI</span>
+                <span>Endpoint: <code>/detect/{fault}</code></span>
+                <span id="lastUpdated">Awaiting first analysis</span>
+            </div>
+        </section>
+
+        <!-- RESULT CARDS -->
+        <section class="result-grid">
+
+            <!-- MACHINE HEALTH -->
+            <article class="result-card health-card">
+                <div class="card-topline">
+                    <span class="card-label">MACHINE HEALTH</span>
+                    <span class="card-symbol symbol-green">+</span>
+                </div>
+
+                <div class="health-gauge" id="healthGauge"
+                     style="--health-angle: 0deg; --health-color: #00ff9c;">
+                    <div class="health-gauge-inner">
+                        <div class="health-number" id="health">--</div>
+                        <div class="health-percent">HEALTH SCORE</div>
+                    </div>
+                </div>
+
+                <div class="health-status" id="healthStatus">
+                    Awaiting analysis
+                </div>
+
+                <p class="metric-caption">
+                    Estimated machine condition
+                </p>
+            </article>
+
+            <!-- MODEL CONFIDENCE -->
+            <article class="result-card info-card">
+                <div class="card-topline">
+                    <span class="card-label">MODEL CONFIDENCE</span>
+                    <span class="card-symbol symbol-cyan">%</span>
+                </div>
+
+                <div class="metric-value" id="confidence">--</div>
+
+                <p class="metric-caption">
+                    Reported prediction confidence
+                </p>
+
+                <div class="metric-progress">
+                    <div class="metric-progress-fill confidence-fill"
+                         id="confidenceBar"></div>
+                </div>
+
+                <div class="metric-details">
+                    <span>Prediction confidence</span>
+                    <strong id="confidenceLabel">Awaiting data</strong>
+                </div>
+
+                <div class="info-divider"></div>
+
+                <div class="mini-stat">
+                    <span>Detection engine</span>
+                    <strong>Random Forest</strong>
+                </div>
+
+                <div class="mini-stat">
+                    <span>Analysis mode</span>
+                    <strong>AI Classification</strong>
+                </div>
+            </article>
+
+            <!-- ROTATIONAL SPEED -->
+            <article class="result-card info-card speed-card">
+                <div class="card-topline">
+                    <span class="card-label">ROTATIONAL SPEED</span>
+                    <span class="card-symbol symbol-amber">RPM</span>
+                </div>
+
+                <div class="metric-value" id="rpm">--</div>
+
+                <p class="metric-caption">
+                    Simulated shaft speed
+                </p>
+
+                <div class="speed-visual">
+                    <div class="speed-track">
+                        <div class="speed-track-fill" id="speedBar"></div>
+                    </div>
+
+                    <div class="speed-scale">
+                        <span>0 RPM</span>
+                        <span>3000 RPM</span>
+                    </div>
+                </div>
+
+                <div class="info-divider"></div>
+
+                <div class="mini-stat">
+                    <span>Operating mode</span>
+                    <strong id="speedMode">Awaiting data</strong>
+                </div>
+
+                <div class="mini-stat">
+                    <span>Monitoring source</span>
+                    <strong>Virtual Sensor</strong>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- ASSESSMENT AND SENSORS -->
+        <section class="overview-grid">
+
+            <article class="panel overview-card">
+                <div class="section-heading compact-heading">
+                    <div class="heading-icon">02</div>
+                    <div>
+                        <h3>Fault Assessment</h3>
+                        <p>Current model output</p>
+                    </div>
+                </div>
+
+                <div class="assessment-row">
+                    <span class="assessment-label">Fault location</span>
+                    <strong id="location">Awaiting data</strong>
+                </div>
+
+                <div class="assessment-row">
+                    <span class="assessment-label">Severity</span>
+                    <strong id="severity" class="severity-pill">--</strong>
+                </div>
+
+                <div class="assessment-row">
+                    <span class="assessment-label">Machine status</span>
+                    <strong id="status">Awaiting data</strong>
+                </div>
+
+                <div class="assessment-note">
+                    <span class="note-icon">i</span>
+                    Results are generated from simulated signals and the trained model.
+                </div>
+            </article>
+
+            <!-- VIRTUAL SENSOR NETWORK -->
+            <article class="panel sensor-section">
+                <div class="section-heading compact-heading">
+                    <div class="heading-icon">03</div>
+                    <div>
+                        <h3>Virtual Sensor Network</h3>
+                        <p>RMS readings from four simulated channels</p>
+                    </div>
+                </div>
+
+                <div class="sensor-grid">
+
+                    <div class="sensor-card normal-sensor" id="sensorCard1">
+                        <div class="sensor-top">
+                            <span class="sensor-name">SENSOR 01</span>
+                            <span class="sensor-light"></span>
+                        </div>
+                        <div class="sensor-value" id="sensor1">--</div>
+                        <div class="sensor-bottom">RMS AMPLITUDE</div>
+                    </div>
+
+                    <div class="sensor-card normal-sensor" id="sensorCard2">
+                        <div class="sensor-top">
+                            <span class="sensor-name">SENSOR 02</span>
+                            <span class="sensor-light"></span>
+                        </div>
+                        <div class="sensor-value" id="sensor2">--</div>
+                        <div class="sensor-bottom">RMS AMPLITUDE</div>
+                    </div>
+
+                    <div class="sensor-card normal-sensor" id="sensorCard3">
+                        <div class="sensor-top">
+                            <span class="sensor-name">SENSOR 03</span>
+                            <span class="sensor-light"></span>
+                        </div>
+                        <div class="sensor-value" id="sensor3">--</div>
+                        <div class="sensor-bottom">RMS AMPLITUDE</div>
+                    </div>
+
+                    <div class="sensor-card normal-sensor" id="sensorCard4">
+                        <div class="sensor-top">
+                            <span class="sensor-name">SENSOR 04</span>
+                            <span class="sensor-light"></span>
+                        </div>
+                        <div class="sensor-value" id="sensor4">--</div>
+                        <div class="sensor-bottom">RMS AMPLITUDE</div>
+                    </div>
+
+                </div>
+            </article>
+        </section>
+
+        <!-- GRAPHS -->
+        <section class="graph-section">
+            <div class="signal-stack">
+
+                <!-- WAVEFORM -->
+                <article class="panel graph-panel">
+                    <div class="graph-header">
+                        <div class="section-heading compact-heading">
+                            <div class="heading-icon">04</div>
+                            <div>
+                                <h3>Time-Domain Waveform</h3>
+                                <p>Simulated signal amplitude over time</p>
+                            </div>
+                        </div>
+
+                        <div class="graph-legend">
+                            <span class="legend-line waveform-legend"></span>
+                            <span>Signal</span>
+                        </div>
+                    </div>
+
+                    <div class="graph-meta">
+                        <span>AMPLITUDE</span>
+                        <span>TIME →</span>
+                    </div>
+
+                    <div class="chart-wrap">
+                        <canvas id="waveform"
+                                aria-label="Time-domain waveform graph"></canvas>
+                    </div>
+
+                    <div class="graph-footer">
+                        <span>TIME DOMAIN</span>
+                        <span>LIVE SIMULATED SIGNAL</span>
+                    </div>
+                </article>
+
+                <!-- FFT -->
+                <article class="panel graph-panel">
+                    <div class="graph-header">
+                        <div class="section-heading compact-heading">
+                            <div class="heading-icon">05</div>
+                            <div>
+                                <h3>Frequency Spectrum (FFT)</h3>
+                                <p>Frequency components of the machine signal</p>
+                            </div>
+                        </div>
+
+                        <div class="graph-legend">
+                            <span class="legend-line fft-legend"></span>
+                            <span>FFT Magnitude</span>
+                        </div>
+                    </div>
+
+                    <div class="graph-meta">
+                        <span>MAGNITUDE</span>
+                        <span>FREQUENCY (Hz) →</span>
+                    </div>
+
+                    <div class="chart-wrap">
+                        <canvas id="fft"
+                                aria-label="FFT frequency spectrum graph"></canvas>
+                    </div>
+
+                    <div class="graph-footer">
+                        <span>FREQUENCY DOMAIN</span>
+                        <span>SPECTRAL ANALYSIS</span>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- DETECTION HISTORY -->
+        <section class="panel history-section">
+            <div class="section-heading compact-heading">
+                <div class="heading-icon">06</div>
+                <div>
+                    <h3>Detection History</h3>
+                    <p>Most recent analysis results</p>
+                </div>
+            </div>
+
+            <div class="history-table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>FAULT CLASS</th>
+                            <th>CONFIDENCE</th>
+                            <th>LOCATION</th>
+                            <th>SEVERITY</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="historyBody">
+                        <tr>
+                            <td colspan="6" class="empty-history">
+                                No analysis recorded yet. Run a detection to begin.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <span>
+                REAL TIME ACOUSTIC FAULT DETECTION
+                <span class="footer-divider">/</span>
+                MONITORING CONSOLE
+            </span>
+
+            <span>SOFTWARE PROTOTYPE · NO PHYSICAL SENSORS CONNECTED</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
